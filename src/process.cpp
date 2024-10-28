@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "process.h"
 #include "linux_parser.h"
@@ -62,7 +63,28 @@ string Process::Ram() { return string(); }
 string Process::User() { return user_; }
 
 // TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return 0; }
+long int Process::UpTime() {
+  string line, tmp, up_time;
+
+  std::ifstream stream(LinuxParser::kProcDirectory + std::to_string(pid_) + LinuxParser::kStatFilename);
+  if (stream.is_open()) {
+    if (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      for (int i = 0; i < 21; i++)
+      {
+        linestream >> tmp;
+      }
+      linestream >> up_time;
+    }
+  }
+  try { stol(up_time); }
+  catch(const std::exception& e) {
+    // std::cerr << e.what() << '\n';
+    return -1;
+  }
+
+  return stol(up_time) / sysconf(_SC_CLK_TCK);
+}
 
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
