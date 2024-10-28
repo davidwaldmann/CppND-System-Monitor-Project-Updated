@@ -51,7 +51,28 @@ Process::Process(int pid) : pid_(pid) {
 int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization() const { return 0; }
+float Process::CpuUtilization() const {
+  string line;
+  string time[22];
+  std::ifstream stream(LinuxParser::kProcDirectory + std::to_string(pid_) + LinuxParser::kStatFilename);
+  if (stream.is_open()) {
+    if (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      for (int i = 0; i < 22; i++) {
+        linestream >> time[i];
+      }
+    }
+  }
+  long utime = stol(time[13]);
+  long stime = stol(time[14]);
+  long cutime = stol(time[15]);
+  long cstime = stol(time[16]);
+  long starttime = stol(time[21]);
+
+  long total_time = utime + stime + cutime + cstime;
+  int seconds = LinuxParser::UpTime() - (starttime / sysconf(_SC_CLK_TCK));
+  return float(total_time / sysconf(_SC_CLK_TCK)) / float(seconds);
+}
 
 // TODO: Return the command that generated this process
 string Process::Command() { return command_; }
