@@ -69,9 +69,11 @@ float Process::CpuUtilization() const {
   long cstime = stol(time[16]);
   long starttime = stol(time[21]);
 
-  long total_time = utime + stime + cutime + cstime;
-  int seconds = LinuxParser::UpTime() - (starttime / sysconf(_SC_CLK_TCK));
-  return float(total_time / sysconf(_SC_CLK_TCK)) / float(seconds);
+  long int total_time = utime + stime + cutime + cstime;
+  float seconds = LinuxParser::UpTime() - (starttime / sysconf(_SC_CLK_TCK));
+  float total = float(total_time / sysconf(_SC_CLK_TCK));
+  float d = total / seconds;
+  return d;
 }
 
 // TODO: Return the command that generated this process
@@ -110,5 +112,5 @@ long int Process::UpTime() {
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
 bool Process::operator<(Process const& a) const {
-  return Process::CpuUtilization() < a.CpuUtilization();
+  return CpuUtilization() < a.CpuUtilization();
 }
