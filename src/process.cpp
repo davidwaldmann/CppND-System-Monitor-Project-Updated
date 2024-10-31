@@ -13,38 +13,8 @@ using std::to_string;
 using std::vector;
 
 Process::Process(int pid) : pid_(pid) {
-  // Get UId
-  string key, value;
-  int uid;
-  string line;
-  std::ifstream stream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kStatusFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      linestream >> key >> value;
-      if (key == "Uid:") uid = std::stoi(value);
-    }
-  }
-  // Get Username
-  string username, permission, strUid;
-  std::ifstream stream1(LinuxParser::kPasswordPath);
-  if (stream1.is_open()) {
-    while (std::getline(stream1, line)) {
-      std::replace(line.begin(), line.end(), ':', ' ');
-      std::istringstream linestream(line);
-      linestream >> username >> permission >> strUid;
-      if (strUid == std::to_string(uid)) {
-        user_ = username;
-      }
-    }
-  }
-  // get command
-  std::ifstream stream2(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kCmdlineFilename);
-  if (stream2.is_open()) {
-    if (std::getline(stream2, line)) {
-      command_ = line;
-    }
-  }
+  user_ = LinuxParser::User(pid);
+  command_ = LinuxParser::Command(pid);
 }
 
 // TODO: Return this process's ID
@@ -52,25 +22,9 @@ int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() const {
-  string line;
-  string time[22];
-  std::ifstream stream(LinuxParser::kProcDirectory + std::to_string(pid_) + LinuxParser::kStatFilename);
-  if (stream.is_open()) {
-    if (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      for (int i = 0; i < 22; i++) {
-        linestream >> time[i];
-      }
-    }
-  }
-  if (time[0] == "") return -1.0;
-  long utime = stol(time[13]);
-  long stime = stol(time[14]);
-  long cutime = stol(time[15]);
-  long cstime = stol(time[16]);
-  long starttime = stol(time[21]);
+  long starttime = LinuxParser::UpTime(pid_);
 
-  long int total_time = utime + stime + cutime + cstime;
+  long int total_time = LinuxParser::ActiveJiffies(pid_);
   float seconds = LinuxParser::UpTime() - (starttime / sysconf(_SC_CLK_TCK));
   float total = float(total_time / sysconf(_SC_CLK_TCK));
   float d = total / seconds;
