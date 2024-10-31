@@ -63,6 +63,7 @@ float Process::CpuUtilization() const {
       }
     }
   }
+  if (time[0] == "") return -1.0;
   long utime = stol(time[13]);
   long stime = stol(time[14]);
   long cutime = stol(time[15]);
