@@ -22,13 +22,9 @@ int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() const {
-  long starttime = LinuxParser::UpTime(pid_);
-
-  long int total_time = LinuxParser::ActiveJiffies(pid_);
-  float seconds = LinuxParser::UpTime() - (starttime / sysconf(_SC_CLK_TCK));
-  float total = float(total_time) / float(sysconf(_SC_CLK_TCK));
-  float d = total / seconds;
-  return d;
+  long seconds = LinuxParser::UpTime(pid_);
+  long totaltime = LinuxParser::ActiveJiffies(pid_) / sysconf(_SC_CLK_TCK);
+  return float(totaltime) / float(seconds);
 }
 
 // TODO: Return the command that generated this process
@@ -36,7 +32,9 @@ string Process::Command() { return command_; }
 
 // TODO: Return this process's memory utilization
 string Process::Ram() {
-  return LinuxParser::Ram(pid_);
+  string ram = LinuxParser::Ram(pid_);
+  ram_ = stoi(ram);
+  return ram;
 }
 
 // TODO: Return the user (name) that generated this process

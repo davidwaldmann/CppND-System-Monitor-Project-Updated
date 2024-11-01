@@ -14,11 +14,8 @@ string Format::ElapsedTime(long seconds) {
     int min = rest % 3600;
     rest = rest - min;
     min = min / 60;
-    int h = rest % (3600 * 24);
-    rest = rest - h;
+    int h = rest;
     h = h / 3600;
-    int d = rest / (3600 * 24);
-    string strDays = (d > 0) ? std::to_string(d) + "d," : "";
-    string output = strDays + std::to_string(h) + ":" + std::to_string(min) + ":" + std::to_string(sec) + "    ";
+    string output = std::to_string(h) + ":" + std::to_string(min) + ":" + std::to_string(sec) + "    ";
     return output;
 }

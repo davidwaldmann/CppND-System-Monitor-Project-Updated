@@ -22,6 +22,7 @@ class Process {
     int pid_;
     std::string user_;
     std::string command_;
+    int ram_ = 0;
 };
 
 #endif
